@@ -36,7 +36,7 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created' . $th
+                'message' => 'Record cannot be created'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
