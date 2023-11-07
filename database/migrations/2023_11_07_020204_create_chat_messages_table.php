@@ -21,10 +21,6 @@ return new class extends Migration
             $table->index('user_id');
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->unsignedBigInteger('helper_id');
-            $table->index('helper_id');
-            $table->foreign('helper_id')->references('id')->on('users');
-
             $table->longText('message');
             $table->timestamps();
         });
