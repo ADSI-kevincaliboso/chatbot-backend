@@ -54,6 +54,10 @@ class AuthController extends Controller
                 'data' => $user
             ], Response::HTTP_OK);
         }
+
+        return response()->json([
+            'message' => 'Wrong Credentials'
+        ], Response::HTTP_NOT_FOUND);
     }
 
     public function logout(Request $request)
