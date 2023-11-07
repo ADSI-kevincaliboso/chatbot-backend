@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ChatroomController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::apiResource('chat-rooms', ChatroomController::class);
+
+    Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
+    Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
 });
 
 Route::post('register', [AuthController::class, 'register']);
