@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewChatMessage;
+use App\Http\Resources\ChatMessageResource;
 use App\Http\Resources\ChatMessagesCollection;
 use App\Models\ChatMessage;
 use Illuminate\Http\Request;
@@ -21,7 +23,7 @@ class ChatController extends Controller
     {
         $chatMessage = ChatMessage::where('chatroom_id', $roomId)
             ->with('user')
-            ->orderBy('created_at', 'DESC')
+            ->orderBy('created_at', 'ASC')
             ->get();
 
         return response()->json([
@@ -47,15 +49,18 @@ class ChatController extends Controller
 
         try {
             DB::beginTransaction();
-            ChatMessage::create([
+            $chat = ChatMessage::create([
                 'user_id' => $userId,
                 'chatroom_id' => $roomId,
                 'message' => $request->message
             ]);
             DB::commit();
 
+            broadcast(new NewChatMessage($chat))->toOthers();
+
             return response()->json([
                 'message' => 'Message sent',
+                'data' => new ChatMessageResource($chat)
             ], Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             DB::rollBack();
