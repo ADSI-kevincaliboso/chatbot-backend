@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatroomController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,6 +25,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
     Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
+});
+
+
+Broadcast::channel('chat.{roomId}', function ($user, $roomId) {
+    if (Auth::check()) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
 });
 
 Route::post('register', [AuthController::class, 'register']);

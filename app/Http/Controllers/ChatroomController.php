@@ -25,22 +25,27 @@ class ChatroomController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->chatroom) {
+            return response()->json(['message' => 'Chatroom Info', 'id' => $user->chatroom->id], Response::HTTP_OK);
+        }
+
         try {
             DB::beginTransaction();
 
-            Chatroom::create([
+            $chatRoom = Chatroom::create([
                 'name' => $user->name
             ]);
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Chatroom created'
+                'message' => 'Chatroom created',
+                'id' => $chatRoom->id
             ], Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created'
+                'message' => 'Record cannot be created' . $th
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
