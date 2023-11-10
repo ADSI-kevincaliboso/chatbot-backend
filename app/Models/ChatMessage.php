@@ -18,7 +18,7 @@ class ChatMessage extends Model
 
     public function room(): HasOne
     {
-        return $this->hasOne(Chatroom::class);
+        return $this->hasOne(Chatroom::class, 'id', 'chatroom_id');
     }
 
     public function user(): HasOne

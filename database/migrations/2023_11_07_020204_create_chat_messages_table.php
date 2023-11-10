@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('chatroom_id');
             $table->index('chatroom_id');
-            $table->foreign('chatroom_id')->references('id')->on('chatrooms');
+            $table->foreign('chatroom_id')->references('id')->on('chatrooms')->onDelete('cascade');
 
             $table->unsignedBigInteger('user_id');
             $table->index('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->longText('message');
             $table->timestamps();

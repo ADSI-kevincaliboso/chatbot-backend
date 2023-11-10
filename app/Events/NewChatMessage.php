@@ -2,10 +2,8 @@
 
 namespace App\Events;
 
-use App\Models\ChatMessage;
-use Illuminate\Broadcasting\Channel;
+use App\Http\Resources\ChatMessageResource;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -20,7 +18,7 @@ class NewChatMessage implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(ChatMessage $chatMessage)
+    public function __construct(ChatMessageResource $chatMessage)
     {
         $this->chatMessage = $chatMessage;
     }
@@ -33,7 +31,12 @@ class NewChatMessage implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('chat'.$this->chatMessage->room->id),
+            new PrivateChannel('chat.'.$this->chatMessage->room->id),
         ];
+    }
+
+    public function broadcastAs()
+    {
+        return 'message.new';
     }
 }
