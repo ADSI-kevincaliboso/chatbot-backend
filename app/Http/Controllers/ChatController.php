@@ -56,7 +56,7 @@ class ChatController extends Controller
             ]);
             DB::commit();
 
-            broadcast(new NewChatMessage($chat))->toOthers();
+            broadcast(new NewChatMessage(new ChatMessageResource($chat)))->toOthers();
 
             return response()->json([
                 'message' => 'Message sent',
