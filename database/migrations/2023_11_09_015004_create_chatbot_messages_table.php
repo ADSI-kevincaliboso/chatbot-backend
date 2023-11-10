@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('chatbot_messages', function (Blueprint $table) {
             $table->id();
+            $table->text('messages');
             $table->timestamps();
         });
     }
