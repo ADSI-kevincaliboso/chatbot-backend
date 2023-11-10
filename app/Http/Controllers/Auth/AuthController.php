@@ -30,7 +30,9 @@ class AuthController extends Controller
 
             DB::commit();
 
-            Auth::attempt(['email' => $user->email, 'password' => $user->password]);
+            Auth::attempt(['email' => $request->email, 'password' => $request->password]);
+
+            $authUser = auth()->user();
 
             $token = $user->createToken(config("app.key"))->plainTextToken;
 
@@ -38,7 +40,7 @@ class AuthController extends Controller
                 'message' => 'Registered successfully',
                 'token' => $token,
                 'chatroomId' => $chatRoom->id,
-                'data' => $user
+                'data' => $authUser
             ], Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             DB::rollBack();
