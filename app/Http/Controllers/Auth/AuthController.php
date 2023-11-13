@@ -24,9 +24,13 @@ class AuthController extends Controller
                 "password" => $request->password
             ]);
 
-            $chatRoom = Chatroom::create([
-                'name' => $user->name
-            ]);
+            if ($user->user_type == 'user') {
+                $chatRoom = Chatroom::create([
+                    'name' => $user->name,
+                    'user_id' => $user->id
+                ]);
+            }
+
 
             DB::commit();
 
@@ -45,7 +49,8 @@ class AuthController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created'
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -58,8 +63,15 @@ class AuthController extends Controller
             $token = $user->createToken(config("app.key"))->plainTextToken;
             $chatroom = 0;
 
-            if ($user->chatroom){
-                $chatroom = $user->chatroom->id;
+            if ($user->user_type == 'user') {
+                if ($user->chatroom){
+                    $chatroom = $user->chatroom->id;
+                } else {
+                    $chatroom = Chatroom::create([
+                        'name' => $user->name,
+                        'user_id' => $user->id
+                    ]);
+                }
             }
             
             return response()->json([

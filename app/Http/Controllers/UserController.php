@@ -2,51 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Chatroom;
+use App\Http\Requests\UserRequest;
+use App\Http\Resources\UserResourceCollection;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class ChatroomController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Chatroom::all();
+        return new UserResourceCollection(User::users()->get());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
-        $user = Auth::user();
+        $data = $request->all();
 
-        if ($user->chatroom) {
-            return response()->json(['message' => 'Chatroom Info', 'id' => $user->chatroom->id], Response::HTTP_OK);
+        if ($request->has('user_type')) {
+            $data['user_type'] = $request->user_type;
         }
-
         try {
             DB::beginTransaction();
-
-            $chatRoom = Chatroom::create([
-                'name' => $user->name
-            ]);
-
+            $user = User::create($data);
             DB::commit();
 
             return response()->json([
-                'message' => 'Chatroom created',
-                'id' => $chatRoom->id
+                'message' => 'Registered successfully',
+                'data' => $user
             ], Response::HTTP_CREATED);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created',
-                'details' => $th->getMessage()
+                'message' => 'Record cannot be created'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -54,12 +49,9 @@ class ChatroomController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Chatroom $chat_room)
+    public function show(string $id)
     {
-        return response()->json([
-            'message' => 'Chatroom information',
-            'data' => $chat_room
-        ], Response::HTTP_OK);
+        //
     }
 
     /**
@@ -73,21 +65,16 @@ class ChatroomController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Chatroom $chat_room)
+    public function destroy(User $user)
     {
         try {
             DB::beginTransaction();
-            $chat_room->delete();
+            $user->delete();
             DB::commit();
-
-            return response()->json([
-                'message' => 'Chatroom deleted'
-            ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created',
-                'details' => $th->getMessage()
+                'message' => 'Record cannot be deleted'
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
