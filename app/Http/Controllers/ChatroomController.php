@@ -45,7 +45,8 @@ class ChatroomController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be created' . $th
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -72,8 +73,22 @@ class ChatroomController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Chatroom $chat_room)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $chat_room->delete();
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Chatroom deleted'
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
