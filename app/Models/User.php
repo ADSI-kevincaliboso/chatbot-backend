@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'user_type'
     ];
 
     /**
@@ -47,5 +48,11 @@ class User extends Authenticatable
     public function chatroom(): HasOne
     {
         return $this->hasOne(Chatroom::class, 'name', 'name');
+    }
+
+    public function scopeUsers($query)
+    {
+        return $query->where('user_type', '=', 'user')
+            ->orWhere('user_type', '=', 'moderator');
     }
 }
