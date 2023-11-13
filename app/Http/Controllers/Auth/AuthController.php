@@ -63,13 +63,15 @@ class AuthController extends Controller
             $token = $user->createToken(config("app.key"))->plainTextToken;
             $chatroom = 0;
 
-            if ($user->chatroom){
-                $chatroom = $user->chatroom->id;
-            } else {
-                $chatroom = Chatroom::create([
-                    'name' => $user->name,
-                    'user_id' => $user->id
-                ]);
+            if ($user->user_type == 'user') {
+                if ($user->chatroom){
+                    $chatroom = $user->chatroom->id;
+                } else {
+                    $chatroom = Chatroom::create([
+                        'name' => $user->name,
+                        'user_id' => $user->id
+                    ]);
+                }
             }
             
             return response()->json([
