@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\DestroyChatroom;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -20,7 +21,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         'App\Events\NewChatMessage' => [
             'App\Listeners\SendChatMessageNotification'
-        ]
+        ],
+        'App\Events\NewChatRoom' => [
+            'App\Listeners\CreateNewChatRoom'
+        ],
+        'App\Events\DestroyChatroom' => [],
     ];
 
     /**
