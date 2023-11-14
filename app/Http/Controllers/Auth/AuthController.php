@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\DestroyChatroom;
+use App\Events\NewChatRoom;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
@@ -24,13 +26,10 @@ class AuthController extends Controller
                 "password" => $request->password
             ]);
 
-            if ($user->user_type == 'user') {
-                $chatRoom = Chatroom::create([
-                    'name' => $user->name,
-                    'user_id' => $user->id
-                ]);
-            }
-
+            $chatRoom = Chatroom::create([
+                'name' => $user->name,
+                'user_id' => $user->id
+            ]);
 
             DB::commit();
 
@@ -39,6 +38,9 @@ class AuthController extends Controller
             $authUser = auth()->user();
 
             $token = $user->createToken(config("app.key"))->plainTextToken;
+            
+            broadcast(new NewChatRoom($chatRoom))->toOthers();
+            
 
             return response()->json([
                 'message' => 'Registered successfully',
@@ -67,12 +69,16 @@ class AuthController extends Controller
                 if ($user->chatroom){
                     $chatroom = $user->chatroom->id;
                 } else {
-                    $chatroom = Chatroom::create([
+                    $createdChatroom = Chatroom::create([
                         'name' => $user->name,
                         'user_id' => $user->id
                     ]);
+
+                    $chatroom = $createdChatroom->id;
+                    broadcast(new NewChatRoom($createdChatroom))->toOthers();
                 }
             }
+
             
             return response()->json([
                 'message' => 'Login success',
@@ -89,7 +95,16 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $user = $request->user();
+
+        if ($user->user_type !== "admin") {
+            // broadcast the chatroom delete here
+            broadcast(new DestroyChatroom($user->chatroom))->toOthers();
+
+            $user->chatroom->delete();
+        }
+
+        $user->tokens()->delete();
         return response()->json(['message' => 'Goodbye'], Response::HTTP_OK);
     }
 }
