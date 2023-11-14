@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewChatRoom;
 use App\Models\Chatroom;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -33,7 +34,8 @@ class ChatroomController extends Controller
             DB::beginTransaction();
 
             $chatRoom = Chatroom::create([
-                'name' => $user->name
+                'name' => $user->name,
+                'user_id' => $user->id
             ]);
 
             DB::commit();
