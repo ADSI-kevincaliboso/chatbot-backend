@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AssignedChatroom;
 use App\Events\NewChatRoom;
+use App\Http\Requests\AssignChatroomRequest;
 use App\Models\Chatroom;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -16,7 +18,7 @@ class ChatroomController extends Controller
      */
     public function index()
     {
-        return Chatroom::all();
+        return Chatroom::where('status', 'active')->get();
     }
 
     /**
@@ -35,7 +37,7 @@ class ChatroomController extends Controller
 
             $chatRoom = Chatroom::create([
                 'name' => $user->name,
-                'user_id' => $user->id
+                'owner' => $user->id
             ]);
 
             DB::commit();
@@ -84,6 +86,34 @@ class ChatroomController extends Controller
 
             return response()->json([
                 'message' => 'Chatroom deleted'
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getAssignedRooms(Request $request) {
+        $user = auth()->user();
+        return Chatroom::where('moderator', $user->id)->activeRooms()->get();
+    }
+
+    public function assignModerator(AssignChatroomRequest $request) {
+        $chatroom = Chatroom::find($request->chatroom_id);
+        try {
+            DB::beginTransaction();
+            $chatroom->update([
+                'moderator' => $request->moderator_id
+            ]);
+            DB::commit();
+
+            broadcast(new AssignedChatroom($chatroom, $request->moderator_id));
+
+            return response()->json([
+                'message' => 'Chatroom Assigned'
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             DB::rollBack();
