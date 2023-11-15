@@ -26,6 +26,7 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\CreateNewChatRoom'
         ],
         'App\Events\DestroyChatroom' => [],
+        'App\Events\AssignedChatroom' => [],
     ];
 
     /**
