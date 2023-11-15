@@ -13,11 +13,18 @@ class Chatroom extends Model
 
     protected $fillable = [
         'name',
-        'user_id'
+        'owner',
+        'status',
+        'moderator'
     ];
 
     public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    public function scopeActiveRooms($query)
+    {
+        return $query->where('status', '=', 'active');
     }
 }

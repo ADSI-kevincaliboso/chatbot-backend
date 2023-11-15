@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('chatroom_id');
             $table->index('chatroom_id');
-            $table->foreign('chatroom_id')->references('id')->on('chatrooms')->onDelete('cascade');
+            $table->foreign('chatroom_id')->references('id')->on('chatrooms');
 
             $table->unsignedBigInteger('user_id');
             $table->index('user_id');

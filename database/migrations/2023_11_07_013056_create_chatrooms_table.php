@@ -14,9 +14,16 @@ return new class extends Migration
         Schema::create('chatrooms', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->unsignedBigInteger('user_id');
-            $table->index('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->unsignedBigInteger('owner');
+            $table->index('owner');
+            $table->foreign('owner')->references('id')->on('users');
+
+            $table->unsignedBigInteger('moderator')->nullable();
+            $table->index('moderator');
+            $table->foreign('moderator')->references('id')->on('users');
+
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->softDeletes();
             $table->timestamps();
         });

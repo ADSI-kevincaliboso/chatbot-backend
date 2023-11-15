@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResourceCollection;
+use App\Models\ChatMessage;
+use App\Models\Chatroom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -69,13 +71,27 @@ class UserController extends Controller
     {
         try {
             DB::beginTransaction();
+            ChatMessage::where('chatroom_id', $user->chatroom->id)->delete();
+            DB::commit();
+
+            DB::beginTransaction();
+            Chatroom::where('id', $user->chatroom->id)->delete();
+            DB::commit();
+
+            DB::beginTransaction();
             $user->delete();
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Record cannot be deleted'
+                'message' => 'Record cannot be deleted',
+                'details' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function getModerators(Request $request)
+    {
+        return User::moderators()->get();
     }
 }
