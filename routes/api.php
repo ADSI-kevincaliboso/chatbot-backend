@@ -21,17 +21,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::middleware(['moderator'])->group(function () {
+        Route::get('chat-rooms/moderator', [ChatroomController::class, 'getAssignedRooms']);
+    });
 
+    
+    Route::middleware(['admin'])->group(function () {
+        Route::get('users/moderators', [UserController::class, 'getModerators']);
+        Route::post('chat-rooms/assign', [ChatroomController::class, 'assignModerator']);
+        Route::apiResources([
+            'users' => UserController::class
+        ]);
+    });
     Route::apiResource('chat-rooms', ChatroomController::class);
 
     Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
     Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
 
-    Route::middleware(['admin'])->group(function () {
-        Route::apiResources([
-            'users' => UserController::class
-        ]);
-    });
 });
 
 
