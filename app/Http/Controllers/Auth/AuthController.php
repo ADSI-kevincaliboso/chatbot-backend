@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\ActiveChatroom;
 use App\Events\DestroyChatroom;
 use App\Events\NewChatRoom;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\ChatMessage;
 use App\Models\Chatroom;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,7 +30,7 @@ class AuthController extends Controller
 
             $chatRoom = Chatroom::create([
                 'name' => $user->name,
-                'user_id' => $user->id
+                'owner' => $user->id
             ]);
 
             DB::commit();
@@ -67,11 +69,14 @@ class AuthController extends Controller
 
             if ($user->user_type == 'user') {
                 if ($user->chatroom){
+                    $user->chatroom->update(['status' => 'active']);
+                    broadcast(new NewChatRoom($user->chatroom))->toOthers();
+                    broadcast(new ActiveChatroom($user->chatroom))->toOthers();
                     $chatroom = $user->chatroom->id;
                 } else {
                     $createdChatroom = Chatroom::create([
                         'name' => $user->name,
-                        'user_id' => $user->id
+                        'owner' => $user->id
                     ]);
 
                     $chatroom = $createdChatroom->id;
@@ -97,11 +102,13 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if ($user->user_type !== "admin") {
+        if ($user->user_type === "user") {
             // broadcast the chatroom delete here
             broadcast(new DestroyChatroom($user->chatroom))->toOthers();
-
-            $user->chatroom->delete();
+            // ChatMessage::where('chatroom_id', $user->chatroom->id)->delete();
+            // Chatroom::where('chatroom_id', $user->chatroom->id)->delete();
+            // $user->chatroom->delete();
+            Chatroom::where('id', $user->chatroom->id)->update(['status' => 'inactive']);
         }
 
         $user->tokens()->delete();
