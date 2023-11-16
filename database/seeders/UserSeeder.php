@@ -19,5 +19,12 @@ class UserSeeder extends Seeder
             'password' => bcrypt('chatbot123'),
             'user_type' => 'admin'
         ]);
+
+        User::create([
+            'name' => 'Chatbot',
+            'email' => 'bot@chatbot.com',
+            'password' => bcrypt('123456'),
+            'user_type' => 'admin'
+        ]);
     }
 }

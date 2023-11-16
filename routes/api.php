@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ChatbotMessageController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatroomController;
 use App\Http\Controllers\UserController;
+use App\Models\ChatbotMessage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
@@ -37,7 +39,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
     Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
-
+    Route::apiResource('chatbot-messages', ChatbotMessageController::class);
 });
 
 
