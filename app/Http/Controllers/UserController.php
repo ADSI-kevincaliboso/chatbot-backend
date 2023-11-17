@@ -70,13 +70,15 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         try {
-            DB::beginTransaction();
-            ChatMessage::where('chatroom_id', $user->chatroom->id)->delete();
-            DB::commit();
-
-            DB::beginTransaction();
-            Chatroom::where('id', $user->chatroom->id)->delete();
-            DB::commit();
+            if ($user->user_type == 'user' && $user->chatroom) {
+                DB::beginTransaction();
+                ChatMessage::where('chatroom_id', $user->chatroom->id)->delete();
+                DB::commit();
+    
+                DB::beginTransaction();
+                Chatroom::where('id', $user->chatroom->id)->delete();
+                DB::commit();
+            }
 
             DB::beginTransaction();
             $user->delete();
