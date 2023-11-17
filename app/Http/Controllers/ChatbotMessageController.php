@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ChatbotMessageResource;
 use App\Http\Resources\ChatbotMessageResourceCollection;
+use App\Http\Resources\ChatMessageResource;
 use App\Models\ChatbotMessage;
 use App\Models\ChatMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ChatbotMessageController extends Controller
 {
@@ -24,11 +28,51 @@ class ChatbotMessageController extends Controller
      */
     public function store(Request $request)
     {
+        // instead of returning an instance of ChatbotMessage, let's create an entry on chatMessage model and eturn it
         $chatbotMessageId = $request->chatbotMessageId;
+        $message = $request->message;
+        $user = Auth::user();
+        $bot = User::find(2);
 
-        $chatbotMessage = ChatbotMessage::find($chatbotMessageId);
+        $botMessage = ChatbotMessage::find($chatbotMessageId);
 
-        return new ChatbotMessageResource(($chatbotMessage));
+        try {
+            DB::beginTransaction();
+            $chat = ChatMessage::create([
+                'user_id' => $user->id,
+                'chatroom_id' => $user->chatroom->id,
+                'message' => $request->message
+            ]);
+            
+            DB::commit();
+
+            DB::beginTransaction();
+            $chatbotMessage = ChatMessage::create([
+                'user_id' => $bot->id,
+                'chatroom_id' => $user->chatroom->id,
+                'message' => $botMessage->message
+            ]);
+            
+            DB::commit();
+
+            
+
+            $data = [
+                "chatbotMessage" => new ChatbotMessageResource(($chatbotMessage)),
+                "chatMessage" => new ChatMessageResource($chat)
+            ];
+
+            return response()->json([
+                'message' => 'Message sent',
+                'data' => $data
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
