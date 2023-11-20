@@ -59,9 +59,25 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $user->update([
+                'doneWithChatbot' => true
+            ]);
+            DB::commit();
+
+            return response()->json([
+                "message" => 'User update done',
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Record cannot be updated',
+                'details' => $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
