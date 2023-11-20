@@ -35,10 +35,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
             'users' => UserController::class
         ]);
     });
+    Route::patch('users/{user}', [UserController::class, 'update']);
     Route::apiResource('chat-rooms', ChatroomController::class);
 
     Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
     Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
+    Route::post('chat/room/{roomId}/message/bot', [ChatController::class, 'newBotMessage']);
     Route::apiResource('chatbot-messages', ChatbotMessageController::class);
 });
 

@@ -30,7 +30,6 @@ class ChatbotMessageController extends Controller
     {
         // instead of returning an instance of ChatbotMessage, let's create an entry on chatMessage model and eturn it
         $chatbotMessageId = $request->chatbotMessageId;
-        $message = $request->message;
         $user = Auth::user();
         $bot = User::find(2);
 
@@ -58,7 +57,7 @@ class ChatbotMessageController extends Controller
             
 
             $data = [
-                "chatbotMessage" => new ChatbotMessageResource(($chatbotMessage)),
+                "chatbotMessage" => new ChatMessageResource(($chatbotMessage)),
                 "chatMessage" => new ChatMessageResource($chat)
             ];
 
