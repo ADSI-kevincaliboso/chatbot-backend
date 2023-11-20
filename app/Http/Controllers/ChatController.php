@@ -6,6 +6,7 @@ use App\Events\NewChatMessage;
 use App\Http\Resources\ChatMessageResource;
 use App\Http\Resources\ChatMessagesCollection;
 use App\Models\ChatMessage;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,36 @@ class ChatController extends Controller
             DB::commit();
 
             broadcast(new NewChatMessage(new ChatMessageResource($chat)))->toOthers();
+
+            return response()->json([
+                'message' => 'Message sent',
+                'data' => new ChatMessageResource($chat)
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Record cannot be created',
+                'details' => $th->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function newBotMessage(Request $request, $roomId)
+    {
+        $request->validate([
+            'message' => 'required'
+        ]);
+
+        $userId = User::find(2)->id;
+
+        try {
+            DB::beginTransaction();
+            $chat = ChatMessage::create([
+                'user_id' => $userId,
+                'chatroom_id' => $roomId,
+                'message' => $request->message
+            ]);
+            DB::commit();
 
             return response()->json([
                 'message' => 'Message sent',
