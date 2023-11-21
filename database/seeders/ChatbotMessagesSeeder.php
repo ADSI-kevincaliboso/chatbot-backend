@@ -16,7 +16,8 @@ class ChatbotMessagesSeeder extends Seeder
         $chatMessages = [
             'Welcome to this Bullying Report Chatbot. What can I help you with today?',
             'Sorry to hear this. Let\'s make an official report for this in our system. Can you tell us what happened?',
-            'This is received. Rest assured that this will be dealt with immediately. Let\'s wait for an admin or moderator to connect to your chatroom for better report creation. Thank you for your patience.'
+            'This is received. Rest assured that this will be dealt with immediately. Let\'s wait for an admin or moderator to connect to your chatroom for better report creation. Thank you for your patience.',
+            'This is a chatbot for reporting incidents mainly with bullying. You can also call your this number +(02) 12345 for immediate help from agencies near you.'
         ];
 
         foreach ($chatMessages as $chatMessage) {
