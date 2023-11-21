@@ -23,6 +23,34 @@ class ChatbotMessageController extends Controller
         return new ChatbotMessageResourceCollection(ChatbotMessage::all());
     }
 
+    public function botInit()
+    {
+        $message = ChatbotMessage::where('id', 1)->with('choices')->get();
+
+        return response()->json([
+            'message' => 'Bot Initialized',
+            'data' => $message
+        ], Response::HTTP_OK);
+    }
+
+    public function getResponse(Request $request)
+    {
+        $selectedId = $request->selectedId;
+
+        $chatbotMessage = ChatbotMessage::where('id', $selectedId)->with('choices')->get();
+        $chat = $chatbotMessage[0];
+
+        return response()->json([
+            'message' => 'Bot Response',
+            'data' => $chat
+        ], Response::HTTP_OK);
+    }
+
+    public function getMessages()
+    {
+        return ChatbotMessage::with('choices')->get();
+    }
+
     /**
      * Store a newly created resource in storage.
      */
