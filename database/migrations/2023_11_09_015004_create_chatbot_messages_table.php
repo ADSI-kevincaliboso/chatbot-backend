@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('chatbot_messages', function (Blueprint $table) {
             $table->id();
             $table->longText('message');
+            $table->integer('nextId')->nullable();
             $table->timestamps();
         });
     }
