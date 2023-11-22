@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ChatbotChoicesController;
 use App\Http\Controllers\ChatbotMessageController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatroomController;
@@ -41,7 +42,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('chat/room/{roomId}/messages', [ChatController::class, 'messages']);
     Route::post('chat/room/{roomId}/message', [ChatController::class, 'newMessage']);
     Route::post('chat/room/{roomId}/message/bot', [ChatController::class, 'newBotMessage']);
+    Route::get('chatbot-messages/init', [ChatbotMessageController::class, 'botInit']);
+    Route::post('chatbot-messages/get-response', [ChatbotMessageController::class, 'getResponse']);
+    Route::post('chatbot-messages/create-incident-report', [ChatbotMessageController::class, 'createIncidentReport']);
     Route::apiResource('chatbot-messages', ChatbotMessageController::class);
+    Route::apiResource('chatbot-choices', ChatbotChoicesController::class);
 });
 
 
