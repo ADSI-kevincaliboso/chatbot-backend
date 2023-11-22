@@ -44,6 +44,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('chat/room/{roomId}/message/bot', [ChatController::class, 'newBotMessage']);
     Route::get('chatbot-messages/init', [ChatbotMessageController::class, 'botInit']);
     Route::post('chatbot-messages/get-response', [ChatbotMessageController::class, 'getResponse']);
+    Route::post('chatbot-messages/create-incident-report', [ChatbotMessageController::class, 'createIncidentReport']);
     Route::apiResource('chatbot-messages', ChatbotMessageController::class);
     Route::apiResource('chatbot-choices', ChatbotChoicesController::class);
 });
