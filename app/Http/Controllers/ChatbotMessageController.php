@@ -9,6 +9,7 @@ use App\Models\ChatbotChoice;
 use App\Models\ChatbotMessage;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Services\ChatMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -18,12 +19,19 @@ class ChatbotMessageController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * 
+     * @return ChatbotMessageResourceCollection
      */
     public function index()
     {
         return new ChatbotMessageResourceCollection(ChatbotMessage::all());
     }
 
+    /**
+     * Initializing the bot messages
+     * 
+     * @return JsonResponse
+     */
     public function botInit()
     {
         $message = ChatbotMessage::where('id', 1)->with('choices')->get();
@@ -34,6 +42,13 @@ class ChatbotMessageController extends Controller
         ], Response::HTTP_OK);
     }
 
+    /**
+     * Getting the response of bot when an option or a choice
+     * is selected.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function getResponse(Request $request)
     {
         $selectedId = $request->selectedId;
@@ -47,11 +62,23 @@ class ChatbotMessageController extends Controller
         ], Response::HTTP_OK);
     }
 
+    /**
+     * Get all the chatbot messages with their
+     * choices assigned.
+     * 
+     * @return ChatbotMessage
+     */
     public function getMessages()
     {
         return ChatbotMessage::with('choices')->get();
     }
 
+    /**
+     * Creating the flow for incident report.
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function createIncidentReport(Request $request)
     {
         $messageId = $request->messageId;
@@ -63,20 +90,14 @@ class ChatbotMessageController extends Controller
         $chatbotMessage = ChatbotMessage::find($messageId);
 
         try {
+            $chatService = new ChatMessageService();
+
             DB::beginTransaction();
-            $chat = ChatMessage::create([
-                'user_id' => $user->id,
-                'chatroom_id' => $user->chatroom->id,
-                'message' => $message
-            ]);
+            $chat = $chatService->createRecord($user->id, $user->chatroom->id, $message);
             DB::commit();
 
             DB::beginTransaction();
-            $chatbot = ChatMessage::create([
-                'user_id' => $bot->id,
-                'chatroom_id' => $user->chatroom->id,
-                'message' => $chatbotMessage->nextPrompt->message
-            ]);
+            $chatbot = $chatService->createRecord($bot->id, $user->chatroom->id, $chatbotMessage->nextPrompt->message);
             DB::commit();
 
             $data = [
@@ -95,11 +116,13 @@ class ChatbotMessageController extends Controller
                 'details' => $th->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return $chatbotMessage->nextPrompt;
     }
 
     /**
      * Store a newly created resource in storage.
+     * 
+     * @param Request $request
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -116,22 +139,16 @@ class ChatbotMessageController extends Controller
         }
 
         try {
+            $chatService = new ChatMessageService();
+
             DB::beginTransaction();
-            $chat = ChatMessage::create([
-                'user_id' => $user->id,
-                'chatroom_id' => $user->chatroom->id,
-                'message' => $request->message
-            ]);
+            $chat = $chatService->createRecord($user->id, $user->chatroom->id, $request->message);
             DB::commit();
 
             $botMessage = ChatbotMessage::find($verify[0]->reply_id);
 
             DB::beginTransaction();
-            $chatbot = ChatMessage::create([
-                'user_id' => $bot->id,
-                'chatroom_id' => $user->chatroom->id,
-                'message' => $botMessage->message
-            ]);
+            $chatbot = $chatService->createRecord($bot->id, $user->chatroom->id, $botMessage->message);
             DB::commit();
 
             $chatbot->nextId = $botMessage->nextId;
