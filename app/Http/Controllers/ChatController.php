@@ -7,6 +7,7 @@ use App\Http\Resources\ChatMessageResource;
 use App\Http\Resources\ChatMessagesCollection;
 use App\Models\ChatMessage;
 use App\Models\User;
+use App\Services\ChatMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -50,11 +51,8 @@ class ChatController extends Controller
 
         try {
             DB::beginTransaction();
-            $chat = ChatMessage::create([
-                'user_id' => $userId,
-                'chatroom_id' => $roomId,
-                'message' => $request->message
-            ]);
+            $chatService = new ChatMessageService();
+            $chat = $chatService->createRecord($userId, $roomId, $request->message);
             DB::commit();
 
             broadcast(new NewChatMessage(new ChatMessageResource($chat)))->toOthers();
@@ -82,11 +80,9 @@ class ChatController extends Controller
 
         try {
             DB::beginTransaction();
-            $chat = ChatMessage::create([
-                'user_id' => $userId,
-                'chatroom_id' => $roomId,
-                'message' => $request->message
-            ]);
+            $chatService = new ChatMessageService();
+
+            $chat = $chatService->createRecord($userId, $roomId, $request->message);
             DB::commit();
 
             return response()->json([
