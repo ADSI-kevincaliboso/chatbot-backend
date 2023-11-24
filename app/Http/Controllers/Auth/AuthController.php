@@ -103,11 +103,7 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user->user_type === "user") {
-            // broadcast the chatroom delete here
             broadcast(new DestroyChatroom($user->chatroom))->toOthers();
-            // ChatMessage::where('chatroom_id', $user->chatroom->id)->delete();
-            // Chatroom::where('chatroom_id', $user->chatroom->id)->delete();
-            // $user->chatroom->delete();
             Chatroom::where('id', $user->chatroom->id)->update(['status' => 'inactive']);
         }
 

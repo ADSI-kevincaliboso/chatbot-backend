@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ChatMessageResource;
 use App\Models\ChatbotChoice;
 use App\Models\ChatMessage;
+use App\Services\ChatMessageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -35,17 +36,12 @@ class ChatbotChoicesController extends Controller
     {
         // create new chatmessage here
         $user = Auth::user();
+        $chatService = new ChatMessageService();
+
         try {
             DB::beginTransaction();
-            $chat = ChatMessage::create([
-                'user_id' => $user->id,
-                'chatroom_id' => $user->chatroom->id,
-                'message' => $chatbot_choice->choice
-            ]);
-            
+            $chat = $chatService->createRecord($user->id, $user->chatroom->id, $chatbot_choice->choice);
             DB::commit();
-
-            // return new ChatMessageResource($chat);
 
             return response()->json([
                 'message' => 'Message sent',
